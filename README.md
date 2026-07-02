@@ -1,8 +1,8 @@
-# Kinetic Fold
+# Kinetic Fold — AITraining2U
 
-A minimal, full-screen hero page for designer **AI Coach** — where a paper-crumple portrait video is scrubbed in real time by your hand.
+Landing page for **AITraining2U**'s AI Vibe Coding + Rapid Prototyping workshop — with a hero where a paper-crumple portrait video is scrubbed in real time by your hand.
 
-Open your hand and the crumpled paper ball unfolds into a portrait. Close it into a fist (or pinch) and the portrait crumples back up. No buttons, no scrollbar — the video timeline **is** your hand.
+Open your hand and the crumpled paper ball unfolds into a portrait. Close it into a fist (or pinch) and the portrait crumples back up. No buttons — the video timeline **is** your hand.
 
 **[Live demo →](https://lowjinghong29.github.io/Kinetic-Fold/ai-coach-hero/)** *(needs a webcam; allow camera access)*
 
@@ -16,6 +16,13 @@ Open your hand and the crumpled paper ball unfolds into a portrait. Close it int
 - **Seekable anywhere** — the video is fetched as a Blob (object URLs are always fully seekable, even on static servers without HTTP Range support) and re-encoded all-intra (`-g 1`) so every frame is a keyframe and scrubbing never stutters
 - **Background removal** — the white-studio footage sits on a white page with `mix-blend-mode: multiply`, so only the paper head remains visible
 - **Camera PiP** — a draggable, resizable device-style window with viewfinder brackets, live skeleton overlay, and a gesture HUD showing the open↔closed meter
+
+## The workshop
+
+A 2-day hands-on vibe coding workshop: build and deploy 3+ live web apps with Claude Code, Google Antigravity, Supabase & Vercel — no programming background required. 100% HRDC claimable (SBL-KHAS).
+
+- 15–16 August 2026 · WORQ Subang, Kuala Lumpur
+- [Book a seat](https://forms.gle/DvghVTjt9F6P8uko9) · [WhatsApp](https://wa.me/60126791203) · hi@aitraining2u.com
 
 ## Run locally
 
@@ -35,7 +42,7 @@ Vanilla HTML/CSS/JS · MediaPipe Tasks Vision (CDN) · no build step
 
 ```
 ai-coach-hero/
-├── index.html   # hero layout + camera PiP markup
+├── index.html   # hero + curriculum, instructors, details sections
 ├── style.css    # white minimal theme, device-style PiP
 ├── app.js       # hand tracking, gesture math, timeline driver
 └── fold.mp4     # paper-crumple video (cropped, all-intra)
