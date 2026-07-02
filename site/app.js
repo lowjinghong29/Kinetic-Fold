@@ -75,7 +75,11 @@ let themeLum = 255; // eased copy of the backdrop luminance
 function driveVideo() {
   if (ready && handPresent && !foldVideo.seeking) {
     smoothProgress += (targetProgress - smoothProgress) * 0.14;
-    const t = smoothProgress * Math.max(foldVideo.duration - 0.05, 0);
+    // Ease-in curve: the backdrop turns black early in the footage (~1.6-3.5s),
+    // so require a much deeper fold before the dark frames are reached.
+    // A full fist still lands on the fully crumpled ball at the end.
+    const shaped = Math.pow(smoothProgress, 2.5);
+    const t = shaped * Math.max(foldVideo.duration - 0.05, 0);
     if (Math.abs(t - foldVideo.currentTime) > 0.02) {
       foldVideo.currentTime = t; // scrub the timeline in real time
     }
