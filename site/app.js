@@ -79,7 +79,7 @@ let themeLum = 255; // eased copy of the backdrop luminance
  * white -> black fade across the 45-75% band, and finish the crumple in the
  * black zone on the last quarter. A full fist still lands on the paper ball. */
 const FADE_START = 1.6, FADE_END = 3.5; // seconds in the footage
-const HOLD_WHITE = 0.45, FADE_DONE = 0.75; // gesture progress breakpoints
+const HOLD_WHITE = 0.6, FADE_DONE = 0.85; // gesture progress breakpoints
 function gestureToTime(p, dur) {
   const end = Math.max(dur - 0.05, 0);
   if (p <= HOLD_WHITE) return (p / HOLD_WHITE) * FADE_START;
