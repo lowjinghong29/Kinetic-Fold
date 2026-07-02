@@ -12,9 +12,6 @@ import {
 const foldVideo = document.getElementById("foldVideo");
 const camVideo = document.getElementById("camVideo");
 const camCanvas = document.getElementById("camCanvas");
-const camState = document.getElementById("camState");
-const camPct = document.getElementById("camPct");
-const meterFill = document.getElementById("camMeterFill");
 const ctx = camCanvas.getContext("2d");
 
 /* ---------------- Hand skeleton topology ---------------- */
@@ -81,17 +78,66 @@ function driveVideo() {
       foldVideo.currentTime = t; // scrub the timeline in real time
     }
   }
-  // No hand: hold the current frame — never autoplay.
+  // The page theme tracks the frame that's on screen, hand or no hand.
+  if (ready) applyTheme(bgLumAt(foldVideo.currentTime));
   requestAnimationFrame(driveVideo);
 }
 requestAnimationFrame(driveVideo);
+
+/* ---------------- Background sync: page follows the video backdrop ----------------
+ * BG_LUM holds the measured luminance (0-255) of fold.mp4's studio backdrop,
+ * one entry per frame at 24 fps (measured offline from the source footage;
+ * every frame after the table is fully black). Driving the page background
+ * from this table keeps it exactly in sync with the video as the backdrop
+ * fades white → black between ~1.6s and ~3.5s.
+ * ------------------------------------------------------------------------ */
+const BG_FPS = 24;
+const BG_LUM = [
+  254, 253, 253, 253, 253, 253, 253, 253, 253, 253, 253, 253, 253, 254, 254,
+  254, 254, 254, 254, 254, 253, 253, 253, 253, 253, 254, 254, 254, 254, 254,
+  254, 254, 254, 254, 254, 254, 254, 254, 250, 248, 247, 242, 236, 236, 233,
+  229, 219, 219, 212, 206, 192, 192, 183, 176, 162, 162, 154, 146, 128, 128,
+  120, 101, 95, 95, 87, 71, 63, 62, 54, 42, 36, 36, 31, 22, 18, 18, 12, 6, 6,
+  6, 2, 1, 1, 1, 0,
+];
+
+function bgLumAt(t) {
+  const f = Math.max(t, 0) * BG_FPS;
+  const i = Math.floor(f);
+  const a = i < BG_LUM.length ? BG_LUM[i] : 0;
+  const b = i + 1 < BG_LUM.length ? BG_LUM[i + 1] : 0;
+  return a + (b - a) * (f - i);
+}
+
+const rootStyle = document.documentElement.style;
+const lerp = (a, b, t) => a + (b - a) * t;
+let appliedLum = -1;
+
+function applyTheme(lum) {
+  if (Math.abs(lum - appliedLum) < 0.75) return; // skip no-op style recalcs
+  appliedLum = lum;
+
+  const v = Math.round(lum);
+  // Ink flips over a narrow band (bg 118 → 96) so contrast never lingers low.
+  const d = clamp01((118 - lum) / 22);
+  const ink = Math.round(lerp(17, 244, d));
+  const mut = Math.round(lerp(96, 166, d));
+
+  rootStyle.setProperty("--paper", `rgb(${v}, ${v}, ${v})`);
+  rootStyle.setProperty("--paper-rgb", `${v}, ${v}, ${v}`);
+  rootStyle.setProperty("--ink", `rgb(${ink}, ${ink}, ${ink})`);
+  rootStyle.setProperty("--muted", `rgb(${mut}, ${mut}, ${mut})`);
+  rootStyle.setProperty(
+    "--hairline",
+    d > 0.5 ? "rgba(255, 255, 255, 0.18)" : "rgba(17, 17, 17, 0.12)"
+  );
+}
 
 /* ---------------- Camera + MediaPipe ---------------- */
 let landmarker = null;
 
 async function init() {
   try {
-    camState.textContent = "Loading model…";
     const vision = await FilesetResolver.forVisionTasks(
       "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm"
     );
@@ -105,7 +151,6 @@ async function init() {
       numHands: 1,
     });
 
-    camState.textContent = "Requesting camera…";
     const stream = await navigator.mediaDevices.getUserMedia({
       video: { width: 640, height: 480, facingMode: "user" },
       audio: false,
@@ -117,7 +162,6 @@ async function init() {
 
     requestAnimationFrame(track);
   } catch (err) {
-    camState.textContent = "Camera unavailable";
     console.error(err);
   }
 }
@@ -139,15 +183,9 @@ function track() {
       handPresent = true;
       targetProgress = handCloseProgress(wlm);
       drawSkeleton(lm);
-      camState.textContent =
-        targetProgress > 0.6 ? "Closed · Crumple" : targetProgress < 0.35 ? "Open · Unfold" : "Transitioning";
-      camPct.textContent = Math.round(targetProgress * 100) + "%";
     } else {
       handPresent = false;
-      camState.textContent = "No hand detected";
-      camPct.textContent = "--";
     }
-    meterFill.style.width = (handPresent ? smoothProgress * 100 : 0) + "%";
   }
   requestAnimationFrame(track);
 }
@@ -196,21 +234,14 @@ init();
 // The window lives in normal flow (its footer slot stays reserved),
 // so dragging moves it with a transform instead of repositioning.
 const win = document.getElementById("camWindow");
-const dragHandle = document.getElementById("camDragHandle");
 const resizeHandle = document.getElementById("camResizeHandle");
-const camToggle = document.getElementById("camToggle");
-
-// Collapse / expand
-camToggle.addEventListener("click", () => {
-  win.classList.toggle("is-collapsed");
-});
 
 let dragX = 0, dragY = 0; // current translate offsets
 
-dragHandle.addEventListener("pointerdown", (e) => {
-  if (e.target.closest(".cam__min")) return; // the button must not start a drag
+win.addEventListener("pointerdown", (e) => {
+  if (e.target.closest(".cam__resize")) return; // resize corner must not start a drag
   e.preventDefault();
-  dragHandle.setPointerCapture(e.pointerId);
+  win.setPointerCapture(e.pointerId);
 
   const rect = win.getBoundingClientRect(); // includes the current transform
   const startX = e.clientX, startY = e.clientY;
@@ -228,11 +259,11 @@ dragHandle.addEventListener("pointerdown", (e) => {
     win.style.transform = `translate(${dragX}px, ${dragY}px)`;
   };
   const onUp = () => {
-    dragHandle.removeEventListener("pointermove", onMove);
-    dragHandle.removeEventListener("pointerup", onUp);
+    win.removeEventListener("pointermove", onMove);
+    win.removeEventListener("pointerup", onUp);
   };
-  dragHandle.addEventListener("pointermove", onMove);
-  dragHandle.addEventListener("pointerup", onUp);
+  win.addEventListener("pointermove", onMove);
+  win.addEventListener("pointerup", onUp);
 });
 
 /* ---------------- Camera window: resize ---------------- */
@@ -243,7 +274,7 @@ resizeHandle.addEventListener("pointerdown", (e) => {
   const startX = e.clientX;
 
   const onMove = (ev) => {
-    const w = Math.min(Math.max(startW + (ev.clientX - startX), 200), 480);
+    const w = Math.min(Math.max(startW + (ev.clientX - startX), 240), 520);
     win.style.width = w + "px"; // height follows via aspect-ratio
   };
   const onUp = () => {
@@ -253,3 +284,37 @@ resizeHandle.addEventListener("pointerdown", (e) => {
   resizeHandle.addEventListener("pointermove", onMove);
   resizeHandle.addEventListener("pointerup", onUp);
 });
+
+/* ---------------- Showcase marquee ---------------- */
+// Each track holds two identical halves so the -50% keyframe loops seamlessly.
+function buildMarquee(trackId, row) {
+  const track = document.getElementById(trackId);
+  const shots = document
+    .getElementById("shotTemplates")
+    .content.querySelectorAll(`.shot[data-row="${row}"]`);
+  for (let half = 0; half < 2; half++) {
+    for (let rep = 0; rep < 2; rep++) {
+      for (const shot of shots) {
+        const node = shot.cloneNode(true);
+        if (half === 1) node.setAttribute("aria-hidden", "true"); // duplicate half
+        track.appendChild(node);
+      }
+    }
+  }
+}
+buildMarquee("marqueeA", "a");
+buildMarquee("marqueeB", "b");
+
+/* ---------------- Scroll reveals ---------------- */
+const revealObserver = new IntersectionObserver(
+  (entries) => {
+    for (const entry of entries) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("is-in");
+        revealObserver.unobserve(entry.target);
+      }
+    }
+  },
+  { threshold: 0.15, rootMargin: "0px 0px -8% 0px" }
+);
+document.querySelectorAll("[data-reveal]").forEach((el) => revealObserver.observe(el));

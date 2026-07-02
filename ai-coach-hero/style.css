@@ -1,7 +1,10 @@
 /* ============ AI Coach — Hero ============ */
 :root {
+  /* Theme vars are driven by app.js: as the fold video's backdrop darkens,
+     the page follows it frame-by-frame and the ink inverts. */
   --ink: #111111;
   --paper: #ffffff;
+  --paper-rgb: 255, 255, 255;
   --muted: rgba(17, 17, 17, 0.62);
   --hairline: rgba(17, 17, 17, 0.12);
   --sans: "Inter", -apple-system, "Segoe UI", sans-serif;
@@ -13,6 +16,7 @@
 
 html, body {
   height: 100%;
+  overflow-x: clip; /* pre-reveal translateX offsets must not widen the page */
 }
 html { scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) {
@@ -48,7 +52,7 @@ a { color: inherit; text-decoration: none; }
   background: var(--ink);
   color: var(--paper);
 }
-.btn--dark:hover { background: #000; }
+.btn--dark:hover { opacity: 0.9; } /* works in both light and inverted themes */
 
 .btn--pill {
   background: var(--paper);
@@ -66,7 +70,7 @@ a { color: inherit; text-decoration: none; }
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   padding: 22px var(--gutter);
-  background: rgba(255, 255, 255, 0.86);
+  background: rgba(var(--paper-rgb), 0.86);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--hairline);
@@ -160,12 +164,24 @@ a { color: inherit; text-decoration: none; }
   align-items: center;
   gap: 28px;
 }
+.hero__footer-copy { display: grid; gap: 10px; }
 .hero__sub {
   max-width: 34ch;
   font-size: 14px;
   line-height: 1.75;
   color: var(--muted);
 }
+.hero__hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.hero__hint .diamond { width: 7px; height: 7px; }
 
 /* ---------------- Fold video (core visual) ---------------- */
 .hero__media {
@@ -173,241 +189,89 @@ a { color: inherit; text-decoration: none; }
   right: clamp(0px, 3vw, 48px);
   top: 50%;
   transform: translateY(-50%);
-  height: min(78vh, 720px);
-  aspect-ratio: 576 / 720;
+  height: min(68vh, 620px);
+  aspect-ratio: 1 / 1;
   pointer-events: none;
 }
 .hero__media video {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transform: scaleX(-1);        /* mirrored horizontally */
-  mix-blend-mode: multiply;      /* keys out the white backdrop against the white page */
-  filter: contrast(1.02);
+  transform: scaleX(-1); /* mirrored horizontally */
+  /* The page background tracks the video backdrop exactly (see app.js),
+     so a soft radial feather is all that's needed to hide the frame edge. */
+  -webkit-mask-image: radial-gradient(ellipse closest-side at 50% 50%, #000 68%, transparent 99%);
+  mask-image: radial-gradient(ellipse closest-side at 50% 50%, #000 68%, transparent 99%);
 }
 
-/* ---------------- Camera window (device-style PiP) ---------------- */
-:root {
-  --cam-ink: #101012;
-  --cam-line: rgba(255, 255, 255, 0.14);
-  --cam-text: rgba(255, 255, 255, 0.92);
-  --cam-dim: rgba(255, 255, 255, 0.48);
-  --cam-live: #2fe07a;
-}
-
+/* ---------------- Camera window (minimal, frameless) ---------------- */
 .cam {
   position: relative; /* in flow: footer reserves its space */
   z-index: 30;
   flex: none;
-  width: clamp(220px, 18vw, 268px);
-  padding: 8px;
-  border-radius: 20px;
-  background: var(--cam-ink);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  width: clamp(280px, 24vw, 380px);
+  aspect-ratio: 4 / 3;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #101012;
+  border: 1px solid var(--hairline);
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.06) inset,
-    0 32px 80px -28px rgba(10, 10, 12, 0.55),
-    0 8px 24px -12px rgba(10, 10, 12, 0.4);
+    0 28px 72px -30px rgba(10, 10, 12, 0.5),
+    0 8px 24px -14px rgba(10, 10, 12, 0.35);
+  cursor: grab;
   user-select: none;
   touch-action: none;
-  animation: cam-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: cam-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
   transition: box-shadow 0.25s ease;
 }
+.cam:active { cursor: grabbing; }
 .cam:hover {
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.08) inset,
-    0 40px 96px -28px rgba(10, 10, 12, 0.6),
-    0 10px 28px -12px rgba(10, 10, 12, 0.45);
+    0 36px 88px -30px rgba(10, 10, 12, 0.55),
+    0 10px 28px -14px rgba(10, 10, 12, 0.4);
 }
 @keyframes cam-in {
   from { opacity: 0; transform: translateY(18px) scale(0.97); }
 }
 
-/* --- Title bar --- */
-.cam__bar {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  height: 32px;
-  padding: 0 6px 0 10px;
-  cursor: grab;
-  color: var(--cam-text);
-}
-.cam__bar:active { cursor: grabbing; }
-
-.cam__live {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  color: var(--cam-live);
-}
-.cam__live i {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--cam-live);
-  box-shadow: 0 0 0 0 rgba(47, 224, 122, 0.5);
-  animation: cam-pulse 2s ease-out infinite;
-}
-@keyframes cam-pulse {
-  0% { box-shadow: 0 0 0 0 rgba(47, 224, 122, 0.5); }
-  70% { box-shadow: 0 0 0 7px rgba(47, 224, 122, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(47, 224, 122, 0); }
-}
-
-.cam__title {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--cam-dim);
-}
-
-.cam__min {
-  margin-left: auto;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 22px;
-  border: 0;
-  border-radius: 7px;
-  background: transparent;
-  color: var(--cam-dim);
-  cursor: pointer;
-  transition: background 0.18s ease, color 0.18s ease;
-}
-.cam__min:hover { background: rgba(255, 255, 255, 0.1); color: var(--cam-text); }
-.cam__min:focus-visible { outline: 1.5px solid var(--cam-live); outline-offset: 1px; }
-.cam__min svg { width: 10px; height: 10px; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; }
-
-/* --- Viewport --- */
-.cam__body { position: relative; }
-
-.cam__view {
-  position: relative;
-  aspect-ratio: 4 / 3;
-  border-radius: 13px;
-  overflow: hidden;
-  background: #000;
-}
-.cam__view video,
-.cam__view canvas {
+.cam video,
+.cam canvas {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
   transform: scaleX(-1); /* selfie mirror */
-}
-
-/* Viewfinder corner brackets */
-.cam__corner {
-  position: absolute;
-  width: 14px;
-  height: 14px;
-  border: 1.5px solid rgba(255, 255, 255, 0.65);
   pointer-events: none;
 }
-.cam__corner--tl { top: 10px; left: 10px; border-right: 0; border-bottom: 0; border-top-left-radius: 4px; }
-.cam__corner--tr { top: 10px; right: 10px; border-left: 0; border-bottom: 0; border-top-right-radius: 4px; }
-.cam__corner--bl { bottom: 58px; left: 10px; border-right: 0; border-top: 0; border-bottom-left-radius: 4px; }
-.cam__corner--br { bottom: 58px; right: 10px; border-left: 0; border-top: 0; border-bottom-right-radius: 4px; }
 
-/* --- Bottom HUD --- */
-.cam__hud {
-  position: absolute;
-  inset: auto 0 0 0;
-  padding: 26px 12px 10px;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.72), rgba(0, 0, 0, 0));
-  color: var(--cam-text);
-}
-
-.cam__readout {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  margin-bottom: 7px;
-}
-.cam__state {
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-}
-.cam__pct {
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--cam-dim);
-  font-variant-numeric: tabular-nums;
-}
-
-.cam__meter {
-  position: relative;
-  height: 4px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.18);
-  overflow: hidden;
-}
-/* tick marks */
-.cam__meter::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(
-    to right,
-    transparent 0 calc(25% - 1px),
-    rgba(16, 16, 18, 0.9) calc(25% - 1px) 25%
-  );
-}
-.cam__meter i {
-  display: block;
-  height: 100%;
-  width: 0%;
-  background: linear-gradient(to right, rgba(255, 255, 255, 0.85), var(--cam-live));
-  border-radius: inherit;
-  transition: width 90ms linear;
-}
-
-.cam__scale {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 6px;
-  font-size: 8.5px;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--cam-dim);
-}
-
-/* --- Collapsed state --- */
-.cam.is-collapsed .cam__body { display: none; }
-.cam.is-collapsed { width: 220px; }
-
-/* --- Resize handle --- */
+/* --- Resize handle: quiet corner mark --- */
 .cam__resize {
   position: absolute;
-  right: -2px;
-  bottom: -2px;
-  width: 20px;
-  height: 20px;
+  right: 0;
+  bottom: 0;
+  width: 26px;
+  height: 26px;
   cursor: nwse-resize;
-  opacity: 0.55;
+  opacity: 0.5;
   transition: opacity 0.18s ease;
-  background:
-    linear-gradient(135deg, transparent 58%, rgba(255, 255, 255, 0.8) 58% 64%, transparent 64% 74%, rgba(255, 255, 255, 0.8) 74% 80%, transparent 80%);
-  border-bottom-right-radius: 13px;
+}
+.cam__resize::before {
+  content: "";
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  width: 10px;
+  height: 10px;
+  border-right: 1.5px solid rgba(255, 255, 255, 0.85);
+  border-bottom: 1.5px solid rgba(255, 255, 255, 0.85);
+  border-bottom-right-radius: 3px;
 }
 .cam__resize:hover { opacity: 1; }
 
 @media (prefers-reduced-motion: reduce) {
   .cam { animation: none; }
-  .cam__live i { animation: none; }
-  .cam__meter i { transition: none; }
 }
-
 /* ================= Page sections ================= */
 .section {
   padding: clamp(72px, 10vh, 128px) var(--gutter);
@@ -695,4 +559,85 @@ a { color: inherit; text-decoration: none; }
   .hero__footer .cam { margin-left: 0; }
   .hero__footer-text { flex-direction: column; align-items: flex-start; gap: 18px; }
   .hero__sub { max-width: 46ch; }
+}
+
+/* ================= Scroll reveals ================= */
+[data-reveal] {
+  opacity: 0;
+  transform: translateX(-40px);
+  transition:
+    opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--d, 0s);
+}
+[data-reveal="right"] { transform: translateX(40px); }
+[data-reveal="up"] { transform: translateY(28px); }
+[data-reveal].is-in { opacity: 1; transform: none; }
+
+/* ================= Showcase marquee ================= */
+.showcase {
+  border-top: 1px solid var(--hairline);
+  padding: clamp(64px, 9vh, 112px) 0;
+  overflow: hidden;
+}
+.showcase__head {
+  max-width: 1360px;
+  margin: 0 auto clamp(36px, 5vh, 56px);
+  padding: 0 var(--gutter);
+}
+.marquee { overflow: hidden; }
+.marquee + .marquee { margin-top: 28px; }
+.marquee__track {
+  display: flex;
+  gap: 24px;
+  width: max-content;
+  padding-right: 24px; /* keeps the -50% loop seamless */
+  animation: marquee-rtl 46s linear infinite;
+}
+.marquee--ltr .marquee__track { animation-name: marquee-ltr; animation-duration: 52s; }
+@keyframes marquee-rtl {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@keyframes marquee-ltr {
+  from { transform: translateX(-50%); }
+  to { transform: translateX(0); }
+}
+.marquee:hover .marquee__track { animation-play-state: paused; }
+
+/* App mockup cards drawn in the page palette so they invert with the theme */
+.shot { flex: none; width: clamp(280px, 23vw, 350px); }
+.shot__frame {
+  border: 1px solid var(--hairline);
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--paper);
+}
+.shot__frame svg { display: block; width: 100%; height: auto; color: var(--ink); }
+.shot__label {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 10px 4px 0;
+}
+.shot__name { font-family: var(--serif); font-style: italic; font-size: 17px; }
+.shot__tag {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* Keep the black CTA card legible when the page itself turns black */
+.cta-card { border: 1px solid var(--hairline); }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] { opacity: 1; transform: none; transition: none; }
+  .marquee__track { animation: none; }
+}
+
+@media (max-width: 900px) {
+  .hero__footer .cam { width: min(78vw, 340px); }
+  .shot { width: min(72vw, 300px); }
 }
