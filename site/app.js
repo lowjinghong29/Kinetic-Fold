@@ -70,16 +70,22 @@ let ready = false;
   );
 })();
 
+let themeLum = 255; // eased copy of the backdrop luminance
+
 function driveVideo() {
   if (ready && handPresent && !foldVideo.seeking) {
-    smoothProgress += (targetProgress - smoothProgress) * 0.22;
+    smoothProgress += (targetProgress - smoothProgress) * 0.14;
     const t = smoothProgress * Math.max(foldVideo.duration - 0.05, 0);
     if (Math.abs(t - foldVideo.currentTime) > 0.02) {
       foldVideo.currentTime = t; // scrub the timeline in real time
     }
   }
-  // The page theme tracks the frame that's on screen, hand or no hand.
-  if (ready) applyTheme(bgLumAt(foldVideo.currentTime));
+  // The page theme tracks the frame that's on screen, hand or no hand,
+  // eased so fast gestures never make the background snap.
+  if (ready) {
+    themeLum += (bgLumAt(foldVideo.currentTime) - themeLum) * 0.16;
+    applyTheme(themeLum);
+  }
   requestAnimationFrame(driveVideo);
 }
 requestAnimationFrame(driveVideo);
@@ -114,7 +120,7 @@ const lerp = (a, b, t) => a + (b - a) * t;
 let appliedLum = -1;
 
 function applyTheme(lum) {
-  if (Math.abs(lum - appliedLum) < 0.75) return; // skip no-op style recalcs
+  if (Math.abs(lum - appliedLum) < 0.35) return; // skip no-op style recalcs
   appliedLum = lum;
 
   const v = Math.round(lum);
