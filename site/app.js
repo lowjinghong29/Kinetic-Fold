@@ -158,10 +158,7 @@ async function init() {
       numHands: 1,
     });
 
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: { width: 640, height: 480, facingMode: "user" },
-      audio: false,
-    });
+    const stream = await openCamera();
     camVideo.srcObject = stream;
     await camVideo.play();
     camCanvas.width = camVideo.videoWidth;
@@ -170,6 +167,35 @@ async function init() {
     requestAnimationFrame(track);
   } catch (err) {
     console.error(err);
+  }
+}
+
+/* Open the default camera; if it is locked by another app (common with
+   vendor "privacy view" layers or virtual cameras), fall back to trying
+   every other video input until one opens. */
+async function openCamera() {
+  const base = { width: 640, height: 480 };
+  try {
+    return await navigator.mediaDevices.getUserMedia({
+      video: { ...base, facingMode: "user" },
+      audio: false,
+    });
+  } catch (err) {
+    if (err.name !== "NotReadableError" && err.name !== "AbortError") throw err;
+    const inputs = (await navigator.mediaDevices.enumerateDevices()).filter(
+      (d) => d.kind === "videoinput"
+    );
+    for (const d of inputs) {
+      try {
+        return await navigator.mediaDevices.getUserMedia({
+          video: { ...base, deviceId: { exact: d.deviceId } },
+          audio: false,
+        });
+      } catch {
+        /* try the next device */
+      }
+    }
+    throw err; // nothing opened — surface the original error
   }
 }
 
