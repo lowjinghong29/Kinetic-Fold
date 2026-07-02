@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Coach — Design &amp; Creative Direction</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Instrument+Serif:ital@0;1&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- ======================= NAV ======================= -->
+  <header class="nav">
+    <a class="nav__logo" href="#">AI&nbsp;Coach</a>
+
+    <nav class="nav__links" aria-label="主导航">
+      <a href="#">首页</a>
+      <a href="#">作品</a>
+      <a href="#">关于</a>
+      <a href="#">联系</a>
+    </nav>
+
+    <div class="nav__actions">
+      <a class="btn btn--dark" href="#">查看作品</a>
+      <a class="btn btn--dark" href="#">打个招呼</a>
+    </div>
+  </header>
+
+  <!-- ======================= HERO ======================= -->
+  <main class="hero">
+    <p class="hero__tagline">
+      <svg class="diamond" viewBox="0 0 10 10" aria-hidden="true">
+        <rect x="1.6" y="1.6" width="6.8" height="6.8" transform="rotate(45 5 5)" />
+      </svg>
+      <span><em>Design</em>&nbsp;&amp;&nbsp;Creative&nbsp;Direction</span>
+    </p>
+
+    <h1 class="hero__title">
+      Crafting digital<br />
+      experiences,<br />
+      <span class="hero__title-serif">one fold at a time.</span>
+    </h1>
+
+    <div class="hero__footer">
+      <p class="hero__sub">
+        AI Coach — 独立设计师与创意指导。以极简的秩序与动态的叙事，
+        把每一次交互折叠进克制而高级的数字体验之中。
+      </p>
+      <a class="btn btn--pill" href="#">View&nbsp;Work&nbsp;-&gt;</a>
+    </div>
+
+    <!-- 折纸视频：水平镜像，白底通过 multiply 与页面融合 -->
+    <div class="hero__media">
+      <video id="foldVideo" muted playsinline preload="auto"></video>
+    </div>
+  </main>
+
+  <!-- ================ 悬浮摄像头窗口 ================ -->
+  <div class="cam" id="camWindow">
+    <div class="cam__bar" id="camDragHandle">
+      <span class="cam__live"><i aria-hidden="true"></i>LIVE</span>
+      <span class="cam__title">Hand&nbsp;Tracking</span>
+      <button class="cam__min" id="camToggle" aria-label="折叠摄像头窗口">
+        <svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1.5 5h7" /></svg>
+      </button>
+    </div>
+
+    <div class="cam__body">
+      <div class="cam__view">
+        <video id="camVideo" autoplay muted playsinline></video>
+        <canvas id="camCanvas"></canvas>
+
+        <span class="cam__corner cam__corner--tl" aria-hidden="true"></span>
+        <span class="cam__corner cam__corner--tr" aria-hidden="true"></span>
+        <span class="cam__corner cam__corner--bl" aria-hidden="true"></span>
+        <span class="cam__corner cam__corner--br" aria-hidden="true"></span>
+
+        <div class="cam__hud">
+          <div class="cam__readout">
+            <span class="cam__state" id="camState">正在启动…</span>
+            <span class="cam__pct" id="camPct">--</span>
+          </div>
+          <div class="cam__meter"><i id="camMeterFill"></i></div>
+          <div class="cam__scale">
+            <span>Open&nbsp;·&nbsp;展开</span>
+            <span>Closed&nbsp;·&nbsp;揉皱</span>
+          </div>
+        </div>
+      </div>
+      <div class="cam__resize" id="camResizeHandle" aria-hidden="true"></div>
+    </div>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
