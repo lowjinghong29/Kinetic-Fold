@@ -13,7 +13,6 @@
 
 html, body {
   height: 100%;
-  overflow: hidden; /* full screen, no scrolling */
 }
 
 body {
@@ -91,7 +90,7 @@ a { color: inherit; text-decoration: none; }
    The camera window occupies real space in the footer, so nothing overlaps. */
 .hero {
   position: relative;
-  height: 100dvh;
+  min-height: 100dvh; /* fills the screen but the page can scroll */
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -141,14 +140,17 @@ a { color: inherit; text-decoration: none; }
 
 .hero__footer {
   display: flex;
-  align-items: flex-end;
-  gap: clamp(28px, 3vw, 48px);
+  flex-direction: column; /* camera on top, copy below */
+  align-items: flex-start;
+  gap: 22px;
+}
+.hero__footer .cam {
+  margin-left: clamp(20px, 3vw, 56px); /* nudge the camera toward the right */
 }
 .hero__footer-text {
   display: flex;
   align-items: center;
   gap: 28px;
-  padding-bottom: 10px; /* optical alignment with camera bezel */
 }
 .hero__sub {
   max-width: 34ch;
