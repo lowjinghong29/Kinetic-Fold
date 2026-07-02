@@ -72,14 +72,26 @@ let ready = false;
 
 let themeLum = 255; // eased copy of the backdrop luminance
 
+/* Piecewise gesture -> timeline map.
+ * The footage's backdrop fades white -> black between ~1.6s and ~3.5s,
+ * very early in the 10s timeline — so a small fold used to already hit black.
+ * Remap: hold the white portrait for the first 45% of the fold, stretch the
+ * white -> black fade across the 45-75% band, and finish the crumple in the
+ * black zone on the last quarter. A full fist still lands on the paper ball. */
+const FADE_START = 1.6, FADE_END = 3.5; // seconds in the footage
+const HOLD_WHITE = 0.45, FADE_DONE = 0.75; // gesture progress breakpoints
+function gestureToTime(p, dur) {
+  const end = Math.max(dur - 0.05, 0);
+  if (p <= HOLD_WHITE) return (p / HOLD_WHITE) * FADE_START;
+  if (p <= FADE_DONE)
+    return FADE_START + ((p - HOLD_WHITE) / (FADE_DONE - HOLD_WHITE)) * (FADE_END - FADE_START);
+  return FADE_END + ((p - FADE_DONE) / (1 - FADE_DONE)) * (end - FADE_END);
+}
+
 function driveVideo() {
   if (ready && handPresent && !foldVideo.seeking) {
     smoothProgress += (targetProgress - smoothProgress) * 0.14;
-    // Ease-in curve: the backdrop turns black early in the footage (~1.6-3.5s),
-    // so require a much deeper fold before the dark frames are reached.
-    // A full fist still lands on the fully crumpled ball at the end.
-    const shaped = Math.pow(smoothProgress, 2.5);
-    const t = shaped * Math.max(foldVideo.duration - 0.05, 0);
+    const t = gestureToTime(smoothProgress, foldVideo.duration);
     if (Math.abs(t - foldVideo.currentTime) > 0.02) {
       foldVideo.currentTime = t; // scrub the timeline in real time
     }
@@ -87,7 +99,7 @@ function driveVideo() {
   // The page theme tracks the frame that's on screen, hand or no hand,
   // eased so fast gestures never make the background snap.
   if (ready) {
-    themeLum += (bgLumAt(foldVideo.currentTime) - themeLum) * 0.16;
+    themeLum += (bgLumAt(foldVideo.currentTime) - themeLum) * 0.09; /* slower, longer glide */
     applyTheme(themeLum);
   }
   requestAnimationFrame(driveVideo);
