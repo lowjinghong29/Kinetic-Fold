@@ -132,6 +132,7 @@ function applyTheme(lum) {
   rootStyle.setProperty("--paper", `rgb(${v}, ${v}, ${v})`);
   rootStyle.setProperty("--paper-rgb", `${v}, ${v}, ${v}`);
   rootStyle.setProperty("--ink", `rgb(${ink}, ${ink}, ${ink})`);
+  rootStyle.setProperty("--ink-rgb", `${ink}, ${ink}, ${ink}`);
   rootStyle.setProperty("--muted", `rgb(${mut}, ${mut}, ${mut})`);
   rootStyle.setProperty(
     "--hairline",

@@ -3,6 +3,7 @@
   /* Theme vars are driven by app.js: as the fold video's backdrop darkens,
      the page follows it frame-by-frame and the ink inverts. */
   --ink: #111111;
+  --ink-rgb: 17, 17, 17;
   --paper: #ffffff;
   --paper-rgb: 255, 255, 255;
   --muted: rgba(17, 17, 17, 0.62);
@@ -47,6 +48,7 @@ a { color: inherit; text-decoration: none; }
   transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease;
 }
 .btn:hover { transform: translateY(-1px); }
+.btn:active { transform: translateY(0) scale(0.98); } /* tactile press */
 
 .btn--dark {
   background: var(--ink);
@@ -406,7 +408,7 @@ a { color: inherit; text-decoration: none; }
   border-bottom: 1px solid var(--hairline);
   font-size: 14.5px;
   line-height: 1.6;
-  color: rgba(17, 17, 17, 0.8);
+  color: rgba(var(--ink-rgb), 0.8);
 }
 .day__list li::before {
   content: counter(item, decimal-leading-zero);
@@ -441,7 +443,12 @@ a { color: inherit; text-decoration: none; }
   border-radius: 999px;
   font-size: 13px;
   font-weight: 500;
-  color: rgba(17, 17, 17, 0.75);
+  color: rgba(var(--ink-rgb), 0.75);
+  transition: border-color 0.25s ease, color 0.25s ease;
+}
+.tools li:hover {
+  border-color: var(--ink);
+  color: var(--ink);
 }
 
 /* ---------------- Instructors ---------------- */
@@ -594,7 +601,12 @@ a { color: inherit; text-decoration: none; }
   margin: 0 auto clamp(36px, 5vh, 56px);
   padding: 0 var(--gutter);
 }
-.marquee { overflow: hidden; }
+.marquee {
+  overflow: hidden;
+  /* cards dissolve at the row edges instead of hard-clipping */
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 7%, #000 93%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0%, #000 7%, #000 93%, transparent 100%);
+}
 .marquee + .marquee { margin-top: 28px; }
 .marquee__track {
   display: flex;
@@ -621,6 +633,11 @@ a { color: inherit; text-decoration: none; }
   border-radius: 14px;
   overflow: hidden;
   background: var(--paper);
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
+}
+.shot:hover .shot__frame {
+  transform: translateY(-4px);
+  border-color: rgba(var(--ink-rgb), 0.35);
 }
 .shot__frame svg { display: block; width: 100%; height: auto; color: var(--ink); }
 .shot__label {
