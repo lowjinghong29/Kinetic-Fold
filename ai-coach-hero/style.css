@@ -4,8 +4,8 @@
   --paper: #ffffff;
   --muted: rgba(17, 17, 17, 0.62);
   --hairline: rgba(17, 17, 17, 0.12);
-  --sans: "Inter", "PingFang SC", "Microsoft YaHei", sans-serif;
-  --serif: "Instrument Serif", "Songti SC", serif;
+  --sans: "Inter", -apple-system, "Segoe UI", sans-serif;
+  --serif: "Instrument Serif", Georgia, serif;
   --gutter: clamp(24px, 4vw, 56px);
 }
 
@@ -13,7 +13,7 @@
 
 html, body {
   height: 100%;
-  overflow: hidden; /* 全屏、无滚动 */
+  overflow: hidden; /* full screen, no scrolling */
 }
 
 body {
@@ -25,7 +25,7 @@ body {
 
 a { color: inherit; text-decoration: none; }
 
-/* ---------------- 按钮 ---------------- */
+/* ---------------- Buttons ---------------- */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -54,7 +54,7 @@ a { color: inherit; text-decoration: none; }
 }
 .btn--pill:hover { background: var(--ink); color: var(--paper); }
 
-/* ---------------- 导航 ---------------- */
+/* ---------------- Navigation ---------------- */
 .nav {
   position: fixed;
   inset: 0 0 auto 0;
@@ -87,16 +87,18 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* ---------------- Hero ---------------- */
+/* Left column is a flow layout: tagline → title → footer row.
+   The camera window occupies real space in the footer, so nothing overlaps. */
 .hero {
   position: relative;
   height: 100dvh;
-  padding: 0 var(--gutter);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: clamp(88px, 12vh, 128px) var(--gutter) clamp(24px, 4.5vh, 44px);
 }
 
 .hero__tagline {
-  position: absolute;
-  top: clamp(96px, 14vh, 140px);
-  left: var(--gutter);
   display: inline-flex;
   align-items: center;
   gap: 10px;
@@ -121,11 +123,8 @@ a { color: inherit; text-decoration: none; }
 }
 
 .hero__title {
-  position: absolute;
-  left: var(--gutter);
-  top: 50%;
-  transform: translateY(-54%);
-  font-size: clamp(44px, 6.4vw, 96px);
+  margin: auto 0; /* vertically centered between tagline and footer */
+  font-size: clamp(40px, 5.6vw, 84px);
   font-weight: 700;
   line-height: 1.04;
   letter-spacing: -0.035em;
@@ -141,12 +140,15 @@ a { color: inherit; text-decoration: none; }
 }
 
 .hero__footer {
-  position: absolute;
-  left: var(--gutter);
-  bottom: clamp(32px, 6vh, 64px);
+  display: flex;
+  align-items: flex-end;
+  gap: clamp(28px, 3vw, 48px);
+}
+.hero__footer-text {
   display: flex;
   align-items: center;
   gap: 28px;
+  padding-bottom: 10px; /* optical alignment with camera bezel */
 }
 .hero__sub {
   max-width: 34ch;
@@ -155,7 +157,7 @@ a { color: inherit; text-decoration: none; }
   color: var(--muted);
 }
 
-/* ---------------- 视频主视觉 ---------------- */
+/* ---------------- Fold video (core visual) ---------------- */
 .hero__media {
   position: absolute;
   right: clamp(0px, 3vw, 48px);
@@ -169,12 +171,12 @@ a { color: inherit; text-decoration: none; }
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transform: scaleX(-1);        /* 水平镜像 */
-  mix-blend-mode: multiply;      /* 白底融入白色页面（抠背景） */
+  transform: scaleX(-1);        /* mirrored horizontally */
+  mix-blend-mode: multiply;      /* keys out the white backdrop against the white page */
   filter: contrast(1.02);
 }
 
-/* ---------------- 悬浮摄像头窗口（设备化 PiP） ---------------- */
+/* ---------------- Camera window (device-style PiP) ---------------- */
 :root {
   --cam-ink: #101012;
   --cam-line: rgba(255, 255, 255, 0.14);
@@ -184,11 +186,10 @@ a { color: inherit; text-decoration: none; }
 }
 
 .cam {
-  position: fixed;
+  position: relative; /* in flow: footer reserves its space */
   z-index: 30;
-  right: var(--gutter);
-  bottom: clamp(28px, 5vh, 52px);
-  width: 288px;
+  flex: none;
+  width: clamp(220px, 18vw, 268px);
   padding: 8px;
   border-radius: 20px;
   background: var(--cam-ink);
@@ -212,7 +213,7 @@ a { color: inherit; text-decoration: none; }
   from { opacity: 0; transform: translateY(18px) scale(0.97); }
 }
 
-/* --- 标题栏 --- */
+/* --- Title bar --- */
 .cam__bar {
   display: flex;
   align-items: center;
@@ -273,7 +274,7 @@ a { color: inherit; text-decoration: none; }
 .cam__min:focus-visible { outline: 1.5px solid var(--cam-live); outline-offset: 1px; }
 .cam__min svg { width: 10px; height: 10px; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; }
 
-/* --- 视图 --- */
+/* --- Viewport --- */
 .cam__body { position: relative; }
 
 .cam__view {
@@ -290,10 +291,10 @@ a { color: inherit; text-decoration: none; }
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transform: scaleX(-1); /* 自拍镜像 */
+  transform: scaleX(-1); /* selfie mirror */
 }
 
-/* 取景框四角 */
+/* Viewfinder corner brackets */
 .cam__corner {
   position: absolute;
   width: 14px;
@@ -306,7 +307,7 @@ a { color: inherit; text-decoration: none; }
 .cam__corner--bl { bottom: 58px; left: 10px; border-right: 0; border-top: 0; border-bottom-left-radius: 4px; }
 .cam__corner--br { bottom: 58px; right: 10px; border-left: 0; border-top: 0; border-bottom-right-radius: 4px; }
 
-/* --- 底部 HUD --- */
+/* --- Bottom HUD --- */
 .cam__hud {
   position: absolute;
   inset: auto 0 0 0;
@@ -340,7 +341,7 @@ a { color: inherit; text-decoration: none; }
   background: rgba(255, 255, 255, 0.18);
   overflow: hidden;
 }
-/* 刻度 */
+/* tick marks */
 .cam__meter::after {
   content: "";
   position: absolute;
@@ -371,11 +372,11 @@ a { color: inherit; text-decoration: none; }
   color: var(--cam-dim);
 }
 
-/* --- 折叠态 --- */
+/* --- Collapsed state --- */
 .cam.is-collapsed .cam__body { display: none; }
 .cam.is-collapsed { width: 220px; }
 
-/* --- 缩放手柄 --- */
+/* --- Resize handle --- */
 .cam__resize {
   position: absolute;
   right: -2px;

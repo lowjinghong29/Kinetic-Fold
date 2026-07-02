@@ -1,9 +1,13 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AI Coach — Design &amp; Creative Direction</title>
+  <meta
+    name="description"
+    content="AI Coach — designer and creative director. A gesture-controlled hero experience: your hand folds and unfolds the story."
+  />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
@@ -17,16 +21,16 @@
   <header class="nav">
     <a class="nav__logo" href="#">AI&nbsp;Coach</a>
 
-    <nav class="nav__links" aria-label="主导航">
-      <a href="#">首页</a>
-      <a href="#">作品</a>
-      <a href="#">关于</a>
-      <a href="#">联系</a>
+    <nav class="nav__links" aria-label="Main navigation">
+      <a href="#">Home</a>
+      <a href="#">Work</a>
+      <a href="#">About</a>
+      <a href="#">Contact</a>
     </nav>
 
     <div class="nav__actions">
-      <a class="btn btn--dark" href="#">查看作品</a>
-      <a class="btn btn--dark" href="#">打个招呼</a>
+      <a class="btn btn--dark" href="#">View&nbsp;Work</a>
+      <a class="btn btn--dark" href="#">Say&nbsp;Hello</a>
     </div>
   </header>
 
@@ -46,54 +50,56 @@
     </h1>
 
     <div class="hero__footer">
-      <p class="hero__sub">
-        AI Coach — 独立设计师与创意指导。以极简的秩序与动态的叙事，
-        把每一次交互折叠进克制而高级的数字体验之中。
-      </p>
-      <a class="btn btn--pill" href="#">View&nbsp;Work&nbsp;-&gt;</a>
+      <!-- Camera window lives in flow here: space is reserved, nothing overlaps -->
+      <div class="cam" id="camWindow">
+        <div class="cam__bar" id="camDragHandle">
+          <span class="cam__live"><i aria-hidden="true"></i>LIVE</span>
+          <span class="cam__title">Hand&nbsp;Tracking</span>
+          <button class="cam__min" id="camToggle" aria-label="Collapse camera window">
+            <svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1.5 5h7" /></svg>
+          </button>
+        </div>
+
+        <div class="cam__body">
+          <div class="cam__view">
+            <video id="camVideo" autoplay muted playsinline></video>
+            <canvas id="camCanvas"></canvas>
+
+            <span class="cam__corner cam__corner--tl" aria-hidden="true"></span>
+            <span class="cam__corner cam__corner--tr" aria-hidden="true"></span>
+            <span class="cam__corner cam__corner--bl" aria-hidden="true"></span>
+            <span class="cam__corner cam__corner--br" aria-hidden="true"></span>
+
+            <div class="cam__hud">
+              <div class="cam__readout">
+                <span class="cam__state" id="camState">Initializing…</span>
+                <span class="cam__pct" id="camPct">--</span>
+              </div>
+              <div class="cam__meter"><i id="camMeterFill"></i></div>
+              <div class="cam__scale">
+                <span>Open&nbsp;·&nbsp;Unfold</span>
+                <span>Closed&nbsp;·&nbsp;Crumple</span>
+              </div>
+            </div>
+          </div>
+          <div class="cam__resize" id="camResizeHandle" aria-hidden="true"></div>
+        </div>
+      </div>
+
+      <div class="hero__footer-text">
+        <p class="hero__sub">
+          AI Coach — independent designer &amp; creative director, folding
+          minimal order and kinetic storytelling into every digital experience.
+        </p>
+        <a class="btn btn--pill" href="#">View&nbsp;Work&nbsp;-&gt;</a>
+      </div>
     </div>
 
-    <!-- 折纸视频：水平镜像，白底通过 multiply 与页面融合 -->
+    <!-- Fold video: mirrored horizontally; white backdrop keyed out via multiply blend -->
     <div class="hero__media">
       <video id="foldVideo" muted playsinline preload="auto"></video>
     </div>
   </main>
-
-  <!-- ================ 悬浮摄像头窗口 ================ -->
-  <div class="cam" id="camWindow">
-    <div class="cam__bar" id="camDragHandle">
-      <span class="cam__live"><i aria-hidden="true"></i>LIVE</span>
-      <span class="cam__title">Hand&nbsp;Tracking</span>
-      <button class="cam__min" id="camToggle" aria-label="折叠摄像头窗口">
-        <svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1.5 5h7" /></svg>
-      </button>
-    </div>
-
-    <div class="cam__body">
-      <div class="cam__view">
-        <video id="camVideo" autoplay muted playsinline></video>
-        <canvas id="camCanvas"></canvas>
-
-        <span class="cam__corner cam__corner--tl" aria-hidden="true"></span>
-        <span class="cam__corner cam__corner--tr" aria-hidden="true"></span>
-        <span class="cam__corner cam__corner--bl" aria-hidden="true"></span>
-        <span class="cam__corner cam__corner--br" aria-hidden="true"></span>
-
-        <div class="cam__hud">
-          <div class="cam__readout">
-            <span class="cam__state" id="camState">正在启动…</span>
-            <span class="cam__pct" id="camPct">--</span>
-          </div>
-          <div class="cam__meter"><i id="camMeterFill"></i></div>
-          <div class="cam__scale">
-            <span>Open&nbsp;·&nbsp;展开</span>
-            <span>Closed&nbsp;·&nbsp;揉皱</span>
-          </div>
-        </div>
-      </div>
-      <div class="cam__resize" id="camResizeHandle" aria-hidden="true"></div>
-    </div>
-  </div>
 
   <script type="module" src="app.js"></script>
 </body>
